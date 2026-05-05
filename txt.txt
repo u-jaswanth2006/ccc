@@ -1,0 +1,4 @@
+.sudo nmcli connection modify "Wired connection 1" ipv4.dns "8.8.8.8 1.1.1.1"
+sudo nmcli connection modify "Wired connection 1" ipv4.ignore-auto-dns yes
+sudo nmcli connection down "Wired connection 1"
+sudo nmcli connection up "Wired connection 1"
