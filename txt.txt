@@ -2,3 +2,11 @@
 sudo nmcli connection modify "Wired connection 1" ipv4.ignore-auto-dns yes
 sudo nmcli connection down "Wired connection 1"
 sudo nmcli connection up "Wired connection 1"
+
+
+
+jassullamgunta06@gmail.com
+Jaswanth@2006
+
+admin@juice-sh.op
+admin123
