@@ -5,11 +5,20 @@ sudo nmcli connection up "Wired connection 1"
 
 
 
+
 jassullamgunta06@gmail.com
 Jaswanth@xxx
 
 admin@juice-sh.op
 admin123
+
+
+
+
+
+
+
+
 
 
 
