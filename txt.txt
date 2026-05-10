@@ -10,3 +10,190 @@ Jaswanth@xxx
 
 admin@juice-sh.op
 admin123
+
+
+
+================================================================
+AWS CLOUDSHELL COMMANDS - ALL EXPERIMENTS
+23BD1A05BM | Weeks 1-13
+================================================================
+
+
+================================================================
+WEEK 1 - EC2: Connect via SSH (CloudShell)
+================================================================
+
+ssh -i keypair.pem ec2-user@<PUBLIC-IP>
+
+whoami
+
+
+================================================================
+WEEK 2 - EBS: Attach, Mount & Persistent Storage
+================================================================
+
+lsblk
+
+lsblk -fs
+
+fdisk /dev/nvme1n1
+
+partprobe
+
+mkfs.xfs /dev/nvme1n1p1
+
+mkdir /mnt/archana
+
+mount /dev/nvme1n1p1 /mnt/archana
+
+df -h
+
+blkid /dev/nvme1n1p1
+
+nano /etc/fstab
+
+UUID=<your-uuid>   /mnt/archana   xfs   defaults,nofail   0   0
+
+mount -a
+
+reboot
+
+df -h
+
+cd /mnt/archana
+
+touch f1
+
+ls
+
+
+================================================================
+WEEK 2 - EBS Snapshot: Connect after volume attach in new region
+================================================================
+
+ssh -i key.pem ec2-user@<PUBLIC-IP>
+
+lsblk
+
+mkdir /mnt/archana
+
+mount /dev/nvme1n1p1 /mnt/archana
+
+ls /mnt/archana
+
+
+================================================================
+WEEK 3 - EFS: Shared File System Setup
+================================================================
+
+sudo su
+
+mkdir efs
+
+yum install -y amazon-efs-utils
+
+ls
+
+mount -t efs -o tls fs-xxxxxxxx:/ efs
+
+cd efs
+
+touch testfile.txt
+
+ls
+
+
+================================================================
+WEEK 5 & 6 - VPC Bastion Server: SSH into Private EC2
+================================================================
+
+scp -i bastion.pem dbserver.pem ubuntu@<BASTION_PUBLIC_IP>:/home/ubuntu/
+
+ssh -i bastion.pem ubuntu@<BASTION_PUBLIC_IP>
+
+ls
+
+ssh -i dbserver.pem ubuntu@<PRIVATE-IP-OF-DB-SERVER>
+
+
+================================================================
+WEEK 6 - NAT Gateway: Test Internet in Private Subnet
+================================================================
+
+sudo apt update
+
+sudo apt install -y curl
+
+curl google.com
+
+
+================================================================
+WEEK 9 - ELB: Web Server Setup on EC2 Instance 1
+================================================================
+
+yum update -y
+
+yum install httpd -y
+
+systemctl start httpd
+
+systemctl enable httpd
+
+echo "This is Server 1" > /var/www/html/index.html
+
+
+================================================================
+WEEK 9 - ELB: Web Server Setup on EC2 Instance 2
+================================================================
+
+yum update -y
+
+yum install httpd -y
+
+systemctl start httpd
+
+systemctl enable httpd
+
+echo "This is Server 2" > /var/www/html/index.html
+
+
+================================================================
+WEEK 12 - IAM: Configure AWS CLI
+================================================================
+
+aws configure
+
+aws s3 ls
+
+aws s3 mb s3://your-unique-bucket-name
+
+aws ec2 describe-instances
+
+
+================================================================
+WEEK 12 - IAM: User Management via CLI
+================================================================
+
+aws iam list-users
+
+aws iam create-user --user-name NewUser
+
+aws iam attach-user-policy --user-name NewUser --policy-arn arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess
+
+aws iam create-access-key --user-name NewUser
+
+aws iam delete-user --user-name NewUser
+
+
+================================================================
+WEEK 13 - IAM Roles: Test Role on EC2 (after role attached)
+================================================================
+
+aws s3 ls
+
+aws ec2 describe-instances
+
+
+================================================================
+END
+================================================================
