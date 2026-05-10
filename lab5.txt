@@ -1,0 +1,401 @@
+Let’s do this VPC Creation + EC2 Connection lab step by step from your PDF
+
+This lab builds:
+
+Internet
+   |
+ IGW
+   |
+Public Subnet ---- EC2 (public)
+   |
+Private Subnet --- EC2 (private)
+STEP 1: Create VPC
+
+Go:
+
+AWS Console → VPC
+
+Click:
+
+Create VPC
+
+Choose:
+
+VPC only
+
+Fill:
+
+Name
+
+Custom-VPC
+
+IPv4 CIDR
+
+10.0.0.0/16
+
+Why /16?
+Large address range for many subnets.
+
+Click:
+
+Create VPC
+STEP 2: Create Public Subnet
+
+Go:
+
+Subnets → Create subnet
+
+Select:
+
+Custom-VPC
+
+Fill:
+
+Subnet name
+
+Public-Subnet
+
+Availability Zone
+
+us-east-1a
+
+IPv4 CIDR
+
+10.0.1.0/24
+
+Click:
+
+Create subnet
+STEP 3: Create Private Subnet
+
+Again:
+
+Subnets → Create subnet
+
+Select same VPC.
+
+Fill:
+
+Subnet name
+
+Private-Subnet
+
+AZ:
+
+us-east-1a
+
+CIDR:
+
+10.0.2.0/24
+
+Create.
+
+Now:
+
+10.0.1.0/24 → public
+10.0.2.0/24 → private
+STEP 4: Create Internet Gateway
+
+Go:
+
+Internet Gateways
+
+Click:
+
+Create internet gateway
+
+Name:
+
+Custom-IGW
+
+Create.
+
+Then:
+
+Select IGW →
+
+Actions → Attach to VPC
+
+Choose:
+
+Custom-VPC
+
+Attach.
+
+STEP 5: Create Public Route Table
+
+Go:
+
+Route Tables
+
+Click:
+
+Create route table
+
+Name:
+
+Public-RT
+
+VPC:
+
+Custom-VPC
+
+Create.
+
+STEP 6: Add Internet Route
+
+Open:
+
+Public-RT
+
+Go:
+
+Routes → Edit routes
+
+Add:
+
+Destination: 0.0.0.0/0
+Target: Internet Gateway
+
+Select:
+
+Custom-IGW
+
+Save.
+
+Meaning:
+all internet traffic goes to IGW.
+
+STEP 7: Associate Public Subnet
+
+In Public-RT:
+
+Go:
+
+Subnet associations
+
+Click:
+
+Edit subnet associations
+
+Select:
+
+Public-Subnet
+
+Save.
+
+STEP 8: Create Private Route Table
+
+Create another route table.
+
+Name:
+
+Private-RT
+
+VPC:
+
+Custom-VPC
+
+Create.
+
+Do NOT add internet route.
+
+Keep only:
+
+local
+STEP 9: Associate Private Subnet
+
+Open:
+
+Private-RT
+
+Go:
+
+Subnet associations
+
+Associate:
+
+Private-Subnet
+
+Save.
+
+Now:
+
+Public subnet:
+
+internet access YES
+
+Private subnet:
+
+internet access NO
+STEP 10: Enable Public IP for Public Subnet
+
+Go:
+
+Subnets
+
+Select:
+
+Public-Subnet
+
+Click:
+
+Actions → Edit subnet settings
+
+Enable:
+
+Auto-assign public IPv4 address
+
+Save.
+
+Important.
+
+STEP 11: Create Security Group
+
+Go:
+
+EC2 → Security Groups
+
+Create:
+
+Name
+
+vpc-sg
+
+VPC:
+
+Custom-VPC
+
+Inbound:
+
+Add:
+
+SSH:
+
+22
+0.0.0.0/0
+
+HTTP:
+
+80
+0.0.0.0/0
+
+Outbound:
+
+All traffic
+0.0.0.0/0
+
+Create.
+
+STEP 12: Launch Public EC2
+
+Go:
+
+EC2 → Launch instance
+
+Fill:
+
+Name:
+
+Public-EC2
+
+AMI:
+
+Amazon Linux 2023
+
+Type:
+
+t2.micro
+
+Key pair:
+choose PEM
+
+Network:
+
+VPC:
+
+Custom-VPC
+
+Subnet:
+
+Public-Subnet
+
+Auto-assign public IP:
+
+Enable
+
+Security group:
+
+vpc-sg
+
+Launch.
+
+STEP 13: Connect Public EC2
+
+From Mac:
+
+chmod 400 key.pem
+ssh -i key.pem ec2-user@public-ip
+
+Test internet:
+
+ping google.com
+
+Should work.
+
+STEP 14: Launch Private EC2
+
+Launch another instance.
+
+Name:
+
+Private-EC2
+
+Same:
+
+Amazon Linux
+t2.micro
+same key
+
+Network:
+
+VPC:
+
+Custom-VPC
+
+Subnet:
+
+Private-Subnet
+
+Auto public IP:
+
+Disable
+
+Security group:
+
+vpc-sg
+
+Launch.
+
+STEP 15: Verify Private Instance
+
+Private instance should show:
+
+No public IP
+
+Direct SSH from laptop should fail.
+
+Expected.
+
+Final Expected Result
+Public EC2
+
+✅ public IP
+✅ internet access
+✅ SSH works
+
+Private EC2
+
+❌ no public IP
+❌ direct internet access (without NAT)
+❌ direct SSH from laptop

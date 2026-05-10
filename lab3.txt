@@ -1,0 +1,254 @@
+Let’s do the EFS lab step by step exactly.
+
+Architecture we are building
+EC2-1 (AZ-a)  ----\
+                    ---> EFS shared storage
+EC2-2 (AZ-b)  ----/
+
+If you create a file in EC2-1, it appears in EC2-2.
+
+STEP 1: Create Security Group for EFS
+
+Go to:
+
+AWS Console → EC2 → Security Groups
+
+Click:
+
+Create security group
+
+Fill:
+
+Security group name:
+
+efs-sg
+
+Description:
+
+EFS access
+
+VPC:
+Choose your default VPC
+
+Inbound rule
+
+Add:
+
+Type: NFS
+Protocol: TCP
+Port: 2049
+Source: Anywhere (0.0.0.0/0)
+
+(For lab this is okay; production should restrict source.)
+
+Click:
+
+Create security group
+STEP 2: Launch First EC2 Instance
+
+Go to:
+
+EC2 → Instances → Launch instance
+
+Fill:
+
+Name
+
+EFS-1
+
+AMI
+
+Amazon Linux 2023
+
+Instance type
+
+t2.micro
+
+Key pair
+Choose existing PEM
+
+Network
+Default VPC
+
+Choose subnet:
+
+subnet-1a / Availability Zone A
+
+Auto assign public IP
+Enable
+
+Security group:
+Choose existing:
+
+efs-sg
+
+Storage:
+Default 8 GB
+
+Click:
+
+Launch instance
+STEP 3: Launch Second EC2 Instance
+
+Repeat same steps.
+
+Name:
+
+EFS-2
+
+Choose different subnet:
+
+subnet-1b / Availability Zone B
+
+Same:
+
+Amazon Linux
+t2.micro
+same key
+same security group
+
+Launch.
+
+Now you have 2 EC2s.
+
+STEP 4: Create EFS File System
+
+Go to:
+
+AWS Console → EFS
+
+Click:
+
+Create file system
+
+Fill:
+
+Name:
+
+MyEFS
+
+VPC:
+default
+
+Click:
+
+Customize
+STEP 5: Network Configuration
+
+For mount targets:
+
+Keep AZ-a
+Keep AZ-b
+
+For each mount target:
+
+Security group:
+select:
+
+efs-sg
+
+Remove default SG if needed.
+
+Click:
+
+Create
+
+Wait until:
+
+Available
+STEP 6: Connect to EC2-1
+
+Get public IP of EFS-1.
+
+From terminal:
+
+ssh -i key.pem ec2-user@public-ip
+
+Then:
+
+sudo su
+
+Create mount folder:
+
+mkdir /efs
+
+Install EFS tools:
+
+yum install -y amazon-efs-utils
+STEP 7: Connect to EC2-2
+
+Open second terminal.
+
+SSH:
+
+ssh -i key.pem ec2-user@public-ip
+
+Then:
+
+sudo su
+mkdir /efs
+yum install -y amazon-efs-utils
+STEP 8: Get Mount Command
+
+Go to:
+
+AWS Console → EFS → your file system
+
+Click:
+
+Attach
+
+Choose:
+
+Mount via DNS
+
+AWS gives command like:
+
+sudo mount -t efs fs-12345678:/ /efs
+
+Copy it.
+
+STEP 9: Mount on EC2-1
+
+Paste:
+
+sudo mount -t efs fs-12345678:/ /efs
+
+Verify:
+
+df -h
+
+You should see EFS mounted.
+
+STEP 10: Mount on EC2-2
+
+Same command:
+
+sudo mount -t efs fs-12345678:/ /efs
+
+Verify:
+
+df -h
+STEP 11: Test Sharing
+
+On EC2-1:
+
+cd /efs
+touch hello.txt
+ls
+
+Output:
+
+hello.txt
+STEP 12: Verify on EC2-2
+
+On EC2-2:
+
+cd /efs
+ls
+
+You should see:
+
+hello.txt
+
+SUCCESS.

@@ -1,0 +1,265 @@
+STEP 6: Create Security Groups (IMPORTANT)
+
+We need 2 security groups:
+
+Bastion SG
+Private Server SG
+A. Bastion Security Group
+
+Go:
+
+EC2 → Security Groups
+
+Click:
+
+Create security group
+
+Fill:
+
+Security group name
+
+bastion-sg
+
+Description
+
+Bastion SSH access
+
+VPC
+
+week6-vpc
+Inbound rules
+
+Add:
+
+Type
+
+SSH
+
+Port
+
+22
+
+Source
+Choose:
+
+My IP
+
+(secure)
+
+Outbound rules
+
+Keep default:
+
+All traffic → 0.0.0.0/0
+
+Click:
+
+Create security group
+B. Private Server Security Group
+
+Again:
+
+Create security group
+
+Fill:
+
+Security group name
+
+private-sg
+
+Description
+
+Private server access
+
+VPC
+
+week6-vpc
+Inbound rules
+
+Add SSH:
+
+Type
+
+SSH
+
+Source:
+
+Custom
+
+Choose:
+
+bastion-sg
+
+(important — only bastion can SSH)
+
+Optional DB rule (for lab PDF):
+
+Add:
+
+Type
+
+MYSQL/Aurora
+
+Port:
+
+3306
+
+Source:
+
+10.0.1.0/24
+Outbound
+
+Keep:
+
+All traffic
+
+Create security group.
+
+Done → next Step 7 (Launch Bastion Server).
+
+My IP (secure)
+
+
+STEP 8: Launch Database / Private Server
+
+Go:
+
+EC2 → Launch instance
+
+Fill:
+
+Name
+
+DB-Server
+
+AMI
+Choose:
+
+Ubuntu Server
+
+Instance type
+
+t2.micro
+
+Key pair
+Create/select:
+
+dbserver.pem
+
+(download it)
+
+Network settings
+
+Click:
+
+Edit
+
+Set:
+
+VPC
+
+week6-vpc
+
+Subnet
+
+Private-Subnet
+
+Auto-assign public IP
+
+Disable
+
+Security group
+Choose:
+
+Select existing security group
+
+Pick:
+
+private-sg
+
+Launch:
+
+Launch instance
+
+Expected:
+DB server should show:
+
+No public IPv4
+Private IP only
+
+STEP 9 using CloudShell
+1. Open CloudShell
+
+Top right in AWS Console:
+
+CloudShell icon (>_)
+
+Click it.
+
+Wait for terminal.
+
+2. SSH into Bastion
+
+Get Bastion public IP from EC2.
+
+Run:
+
+ssh ubuntu@BASTION_PUBLIC_IP
+
+Example:
+
+ssh ubuntu@44.197.xxx.xxx
+
+If asked:
+
+yes
+
+If it says permission denied:
+Use EC2 Instance Connect instead OR upload PEM to CloudShell.
+
+Better/easiest method (CloudShell direct with PEM)
+
+Upload both keys to CloudShell.
+
+CloudShell → Actions → Upload file
+
+Upload:
+
+bastion.pem
+dbserver.pem
+
+Then:
+
+chmod 400 bastion.pem
+chmod 400 dbserver.pem
+
+SSH to bastion:
+
+ssh -i bastion.pem ubuntu@BASTION_PUBLIC_IP
+3. Inside Bastion
+
+Copy DB key from CloudShell to Bastion (new CloudShell tab):
+
+scp -i bastion.pem dbserver.pem ubuntu@BASTION_PUBLIC_IP:~
+4. Back inside Bastion
+
+Fix permissions:
+
+chmod 400 dbserver.pem
+
+SSH to DB server:
+
+ssh -i dbserver.pem ubuntu@DB_PRIVATE_IP
+
+Example:
+
+ssh -i dbserver.pem ubuntu@10.0.2.136
+5. Proof
+
+Inside DB:
+
+hostname
+
+Shows:
+
+ip-10-0-2-xxx

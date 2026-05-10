@@ -1,0 +1,73 @@
+Connect EC2
+ssh -i key1.pem ec2-user@PUBLIC-IP
+Check disks
+lsblk
+
+Example:
+
+xvda
+xvdf
+
+OR NVMe:
+
+nvme0n1
+nvme1n1
+Partition disk
+
+If NVMe:
+
+sudo fdisk /dev/nvme1n1
+
+If xvdf:
+
+sudo fdisk /dev/xvdf
+
+Inside fdisk:
+
+n
+p
+1
+ENTER
+ENTER
+w
+Refresh partition table
+sudo partprobe
+Verify
+lsblk
+
+Expected:
+
+/dev/nvme1n1p1
+Format
+sudo mkfs.xfs /dev/nvme1n1p1
+
+OR
+
+sudo mkfs.xfs /dev/xvdf1
+Create mount folder
+sudo mkdir /mnt/uj
+Mount
+sudo mount /dev/nvme1n1p1 /mnt/uj
+Check
+df -h
+Get UUID
+sudo blkid
+
+Example:
+
+UUID="49e09f63-xxxx"
+Permanent mount
+sudo nano /etc/fstab
+
+Add:
+
+UUID=YOUR-UUID /mnt/uj xfs defaults,nofail 0 0
+
+Save:
+
+CTRL+O
+ENTER
+CTRL+X
+Test
+sudo mount -a
+df -h
